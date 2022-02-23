@@ -7,6 +7,7 @@ conn = psycopg2.connect(database="service",
                         host="localhost",
                         port="5432",)
 cursor=conn.cursor()
+
 @app.route('/', methods=['GET'])
 def index():
     return redirect("/login/")
@@ -19,11 +20,11 @@ def login():
             if (not username) or (not password):
                 return render_template('emptyfield.html')
             try:
-                cursor.execute("SELECT full_name FROM service.users WHERE login=%s AND password=%s", (str(username), str(password)))
-                records = cursor.fetchone()[0]
+                cursor.execute("SELECT full_name, login, password FROM service.users WHERE login=%s AND password=%s", (str(username), str(password)))
+                records = cursor.fetchone()
             except TypeError:
                 return render_template('notexist.html')
-            return render_template('account.html', full_name=records)
+            return render_template('account.html', full_name=records[0], login=records[1], password=records[2])
         elif request.form.get("registration"):
             return redirect("/registration/")
     return render_template('login.html')
